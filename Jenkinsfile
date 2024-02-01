@@ -1,26 +1,27 @@
 node('built-in')
 {
-    stage('ContDownload')
+    stage('ContinuousDownload')
     {
-        cicd.newDownload("maven.git")
+        git 'https://github.com/intelliqittrainings/maven.git'
     }
-    stage('ContBuild')
+    stage('ContinuousBuild')
     {
-        cicd.newBuild()
+        sh 'mvn package'
     }
-    stage('ContDeployment')
+    stage('ContinuousDeployment')
     {
-        cicd.newDeploy("ScriptedPipelinewithsharedlibraries","172.31.32.68","testapp")
+       deploy adapters: [tomcat9(credentialsId: '8cc7d40a-bab0-438d-8dc2-f0d886815228', path: '', url: 'http://172.31.16.84:8080')], contextPath: 'testapp', war: '**/*.war'
     }
-    stage('ContTesting')
+    stage('ContinuousTesting')
     {
-         cicd.newDownload("FunctionalTesting.git")
-         cicd.runSelenium("ScriptedPipelinewithsharedlibraries")
+        git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+        sh 'java -jar /home/ubuntu/.jenkins/workspace/ScriptedPipeline/testing.jar'
     }
-    stage('ContDelivery')
+    stage('ContinuousDelivery')
     {
-        cicd.newDeploy("ScriptedPipelinewithsharedlibraries","172.31.32.210","prodapp")
+        deploy adapters: [tomcat9(credentialsId: '8cc7d40a-bab0-438d-8dc2-f0d886815228', path: '', url: 'http://172.31.29.58:8080')], contextPath: 'prodapp', war: '**/*.war'
     }
+    
     
     
     
